@@ -49,11 +49,12 @@ class ConnectFour {
 private:
     unsigned width;
     unsigned height;
+    unsigned runLength;
     std::vector<Column> columns;
     std::vector<char> players;
     unsigned turn;
 public:
-    ConnectFour(unsigned& height, unsigned& width, std::vector<char> players) : height(height), width(width) {
+    ConnectFour(unsigned& height, unsigned& width, unsigned& runLength, std::vector<char> players) : height(height), width(width), runLength(runLength) {
         this->players = players;
         turn = 0;
         columns = std::vector<Column>(width, Column(height));
@@ -63,6 +64,38 @@ public:
         turn = (turn + 1) % players.size;
         if (checkForWin()) {
             return true;
+        }
+    }
+    char checkForWin() const {
+        // check vertical win
+        for (unsigned i = 0; i < width; i++) {
+            char win = columns[i].isRun(runLength);
+            if (win) {
+                return win;
+            }
+        }
+        // check horizontal win
+        for (unsigned i = 0; i < height; i++) {
+            char currentRun = 0;
+            unsigned currentRunLength = 0;
+            for (unsigned j = 0; j < width; j++) {
+                if (columns[i][j] == currentRun) {
+                    currentRunLength++;
+                    if (currentRunLength >= runLength) {
+                        return currentRun;
+                    }
+                } else {
+                    currentRun = columns[i][j];
+                    currentRunLength = 1;
+                }
+            }
+        }
+        // check diagonal win
+        int starting_x = 1 - height;
+        int starting_y = 0;
+        while (starting_x < width) {
+
+            starting_x++;
         }
     }
 };
