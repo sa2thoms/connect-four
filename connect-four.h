@@ -1,4 +1,8 @@
+#ifndef __CONNECT_FOUR_H__
+#define __CONNECT_FOUR_H__
+
 #include <vector>
+#include <iostream>
 
 class Column {
 private:
@@ -61,7 +65,9 @@ public:
     }
     bool takeTurn(unsigned& column) {
         columns[column].insert(players[turn]);
-        turn = (turn + 1) % players.size;
+        turn = (turn + 1) % players.size();
+        std::cout << "turn: " << turn << std::endl;
+        std::cout << (checkForWin() ? checkForWin() : '0') << std::endl;
         if (checkForWin()) {
             return true;
         }
@@ -91,11 +97,79 @@ public:
             }
         }
         // check diagonal win
+        // up and to the right
         int starting_x = 1 - height;
         int starting_y = 0;
         while (starting_x < width) {
-
+            int x = starting_x;
+            int y = starting_y;
+            char currentRun = 0;
+            unsigned currentRunLength = 0;
+            while (x < width && y < height) {
+                if (x >= 0 && y >= 0) {
+                    if (columns[x][y] == currentRun) {
+                        currentRunLength++;
+                        if (currentRunLength >= runLength) {
+                            return currentRun;
+                        }
+                    } else {
+                        currentRun = columns[x][y];
+                        currentRunLength = 1;
+                    }
+                }
+                x++;
+                y++;
+            }
             starting_x++;
         }
+        // up and to the left
+        starting_x = width + height - 2;
+        starting_y = 0;
+        while (starting_x > 0) {
+            int x = starting_x;
+            int y = starting_y;
+            char currentRun = 0;
+            unsigned currentRunLength = 0;
+            while (x >= 0 && y < height) {
+                if (x < width && y >= 0) {
+                    if (columns[x][y] == currentRun) {
+                        currentRunLength++;
+                        if (currentRunLength >= runLength) {
+                            return currentRun;
+                        }
+                    } else {
+                        currentRun = columns[x][y];
+                        currentRunLength = 1;
+                    }
+                }
+                x--;
+                y++;
+            }
+            starting_x--;
+        }
+        return 0;
+    }
+    void printBoard() const {
+        for (int row = height - 1; row >= 0; row--) {
+            // print the top thingy
+            for (unsigned col = 0; col < width; col++) {
+                std::cout << "+---";
+            }
+            std::cout << "+" << std::endl;
+            // print the row values
+            for (unsigned col = 0; col < width; col++) {
+                char printee = columns[col][row];
+                if (printee == 0) printee = ' ';
+                std::cout << "| " << printee << " ";
+            }
+            std::cout << '|' << std::endl;
+        }
+        // print the bottom thingy
+        for (unsigned col = 0; col < width; col++) {
+            std::cout << "+---";
+        }
+        std::cout << '+' << std::endl;
     }
 };
+
+#endif // header guard
