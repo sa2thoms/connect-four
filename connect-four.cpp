@@ -20,7 +20,6 @@ int main(int argc, char * argv[]) {
             unsigned actualMove = move % width;
             game.takeTurn(actualMove);
             game.printBoard();
-            std::cout << "printing completed successfully" << std::endl;
             char winningChar = game.checkForWin();
             if (winningChar) {
                 std::cout << winningChar << " wins!" << std::endl;

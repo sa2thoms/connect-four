@@ -5,7 +5,7 @@
 #include <iostream>
 
 class Column {
-private:
+public:
     char * cells;
     unsigned height;
     unsigned top;
@@ -54,20 +54,21 @@ private:
     unsigned width;
     unsigned height;
     unsigned runLength;
-    std::vector<Column> columns;
+    Column ** columns;
     std::vector<char> players;
     unsigned turn;
 public:
     ConnectFour(unsigned& height, unsigned& width, unsigned& runLength, std::vector<char> players) : height(height), width(width), runLength(runLength) {
         this->players = players;
         turn = 0;
-        columns = std::vector<Column>(width, Column(height));
+        columns = new Column*[width];
+        for (unsigned i = 0; i < width; i++) {
+            columns[i] = new Column(height);
+        }
     }
     bool takeTurn(unsigned& column) {
-        columns[column].insert(players[turn]);
+        columns[column]->insert(players[turn]);
         turn = (turn + 1) % players.size();
-        std::cout << "turn: " << turn << std::endl;
-        std::cout << (checkForWin() ? checkForWin() : '0') << std::endl;
         if (checkForWin()) {
             return true;
         }
@@ -75,7 +76,7 @@ public:
     char checkForWin() const {
         // check vertical win
         for (unsigned i = 0; i < width; i++) {
-            char win = columns[i].isRun(runLength);
+            char win = columns[i]->isRun(runLength);
             if (win) {
                 return win;
             }
@@ -85,13 +86,13 @@ public:
             char currentRun = 0;
             unsigned currentRunLength = 0;
             for (unsigned j = 0; j < width; j++) {
-                if (columns[i][j] == currentRun) {
+                if ((*columns[i])[j] == currentRun) {
                     currentRunLength++;
                     if (currentRunLength >= runLength) {
                         return currentRun;
                     }
                 } else {
-                    currentRun = columns[i][j];
+                    currentRun = (*columns[i])[j];
                     currentRunLength = 1;
                 }
             }
@@ -107,13 +108,13 @@ public:
             unsigned currentRunLength = 0;
             while (x < width && y < height) {
                 if (x >= 0 && y >= 0) {
-                    if (columns[x][y] == currentRun) {
+                    if ((*columns[x])[y] == currentRun) {
                         currentRunLength++;
                         if (currentRunLength >= runLength) {
                             return currentRun;
                         }
                     } else {
-                        currentRun = columns[x][y];
+                        currentRun = (*columns[x])[y];
                         currentRunLength = 1;
                     }
                 }
@@ -132,13 +133,13 @@ public:
             unsigned currentRunLength = 0;
             while (x >= 0 && y < height) {
                 if (x < width && y >= 0) {
-                    if (columns[x][y] == currentRun) {
+                    if ((*columns[x])[y] == currentRun) {
                         currentRunLength++;
                         if (currentRunLength >= runLength) {
                             return currentRun;
                         }
                     } else {
-                        currentRun = columns[x][y];
+                        currentRun = (*columns[x])[y];
                         currentRunLength = 1;
                     }
                 }
@@ -158,7 +159,7 @@ public:
             std::cout << "+" << std::endl;
             // print the row values
             for (unsigned col = 0; col < width; col++) {
-                char printee = columns[col][row];
+                char printee = (*columns[col])[row];
                 if (printee == 0) printee = ' ';
                 std::cout << "| " << printee << " ";
             }
@@ -169,6 +170,12 @@ public:
             std::cout << "+---";
         }
         std::cout << '+' << std::endl;
+    }
+    ~ConnectFour() {
+        for (unsigned i = 0; i < width; i++) {
+            delete columns[i];
+        }
+        delete[] columns;
     }
 };
 
